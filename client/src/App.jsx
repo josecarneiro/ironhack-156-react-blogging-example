@@ -2,7 +2,13 @@ import React, { Component, Fragment } from "react";
 
 import "./App.css";
 
-import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect
+} from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 import BlogNavbar from "./components/BlogNavbar";
 
@@ -30,6 +36,8 @@ export default class App extends Component {
     };
     this.signOut = this.signOut.bind(this);
     this.loadUser = this.loadUser.bind(this);
+    this.verifyAuthenticated = this.verifyAuthenticated.bind(this);
+    this.verifyUnauthenticated = this.verifyUnauthenticated.bind(this);
   }
 
   componentDidMount() {
@@ -65,6 +73,14 @@ export default class App extends Component {
     });
   }
 
+  verifyAuthenticated() {
+    return !!this.state.user;
+  }
+
+  verifyUnauthenticated() {
+    return !this.state.user;
+  }
+
   render() {
     return (
       <div className="App">
@@ -73,23 +89,33 @@ export default class App extends Component {
             <BlogNavbar user={this.state.user} signOut={this.signOut} />
             <Switch>
               <Route path="/" exact component={ListView} />
-              <Route path="/post/create" component={CreateView} />
-              <Route path="/post/:id/edit" component={EditView} />
-              <Route
+              <ProtectedRoute
+                path="/post/create"
+                component={CreateView}
+                verify={this.verifyAuthenticated}
+              />
+              <ProtectedRoute
+                path="/post/:id/edit"
+                component={EditView}
+                verify={this.verifyAuthenticated}
+              />
+              <Route path="/post/:id" exact component={PostView} />
+              <ProtectedRoute
                 path="/sign-up"
+                verify={this.verifyUnauthenticated}
                 render={props => (
                   <SignUp {...props} exact loadUser={this.loadUser} />
                 )}
               />
-              <Route
+              <ProtectedRoute
                 path="/sign-in"
+                verify={this.verifyUnauthenticated}
                 render={props => (
                   <SignIn {...props} exact loadUser={this.loadUser} />
                 )}
               />
-              <Route path="/post/:id" exact component={PostView} />
               <Route path="/error/:code" component={ErrorView} />
-              <Route path="/" component={CatchAll} />
+              <Redirect path="/" to="/error/404" />
             </Switch>
           </Container>
         </Router>
