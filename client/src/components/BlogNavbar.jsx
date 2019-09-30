@@ -23,6 +23,7 @@ const BlogNavbar = props => {
         </Fragment>
       )) || (
         <Fragment>
+          <span className="btn">{props.user.name}</span>
           <Link className="btn" to="/post/create">
             + Create a Post
           </Link>

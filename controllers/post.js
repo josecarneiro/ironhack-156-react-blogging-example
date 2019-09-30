@@ -44,8 +44,11 @@ exports.load = (req, res, next) => {
 exports.edit = (req, res, next) => {
   const id = req.params.id;
   const { title, body } = req.body;
-  Post.findByIdAndUpdate(
-    id,
+  Post.findOneAndUpdate(
+    {
+      _id: id,
+      user: req.user._id
+    },
     {
       ...(title && { title }),
       ...(body && { body })
@@ -53,7 +56,11 @@ exports.edit = (req, res, next) => {
     { new: true }
   )
     .then(post => {
-      res.json({ type: "success", data: { post } });
+      if (post) {
+        res.json({ type: "success", data: { post } });
+      } else {
+        next(new Error("POST_COULD_NOT_BE_EDITED"));
+      }
     })
     .catch(error => {
       next(error);
@@ -62,9 +69,16 @@ exports.edit = (req, res, next) => {
 
 exports.remove = (req, res, next) => {
   const id = req.params.id;
-  Post.findByIdAndDelete(id)
-    .then(() => {
-      res.json({ type: "success" });
+  Post.findOneAndDelete({
+    _id: id,
+    user: req.user._id
+  })
+    .then(post => {
+      if (post) {
+        res.json({ type: "success" });
+      } else {
+        next(new Error("POST_COULD_NOT_BE_DELETED"));
+      }
     })
     .catch(error => {
       next(error);

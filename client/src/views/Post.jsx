@@ -43,6 +43,7 @@ export default class Post extends Component {
         <div>
           <h1>{post.title}</h1>
           <p>{post.body}</p>
+          <span>Written by {post.user.name}</span>
           <Link to={`/post/${this.props.match.params.id}/edit`}>Edit Post</Link>
         </div>
       )) || <div></div>

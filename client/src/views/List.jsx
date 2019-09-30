@@ -34,6 +34,7 @@ export default class List extends Component {
               <Card.Body>
                 <Card.Title>{post.title}</Card.Title>
                 <Card.Text>{post.body}</Card.Text>
+                <Card.Text>Written by {post.user.name}</Card.Text>
               </Card.Body>
             </Card>
           </Link>
