@@ -7,25 +7,42 @@ const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const serveFavicon = require("serve-favicon");
 
+const expressSession = require("express-session");
+const MongoStore = require("connect-mongo")(expressSession);
+const mongoose = require("mongoose");
+
+const deserializeUserMiddleware = require("./middleware/deserialize-user");
+
 // const indexRouter = require("./routes/index");
 const apiRouter = require("./routes/api");
 
 const app = express();
 
+app.use(serveFavicon(join(__dirname, "public/images", "favicon.ico")));
+app.use(express.static(join(__dirname, "client/build")));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(serveFavicon(join(__dirname, "public/images", "favicon.ico")));
-app.use(express.static(join(__dirname, "client/build")));
+app.use(
+  expressSession({
+    secret: process.env.SESSION_SECRET,
+    cookie: { maxAge: 60 * 60 * 24 * 1000 },
+    resave: true,
+    saveUninitialized: false,
+    store: new MongoStore({
+      mongooseConnection: mongoose.connection,
+      ttl: 24 * 60 * 60
+    })
+  })
+);
 
-const path = require('path');
+app.use(deserializeUserMiddleware);
 
-// app.use('/', indexRouter);
 app.use("/api", apiRouter);
 
 app.get("*", (req, res, next) => {
-  res.sendFile(path.join(__dirname, './client/build/index.html'));
+  res.sendFile(join(__dirname, "./client/build/index.html"));
 });
 
 // Catch missing routes and forward to error handler
