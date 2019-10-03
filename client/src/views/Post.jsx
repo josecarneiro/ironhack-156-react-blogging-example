@@ -19,7 +19,11 @@ export default class Post extends Component {
         });
       })
       .catch(error => {
-        console.log(error);
+        // console.log(error, error.message, error.status);
+        // console.dir(error);
+        this.props.history.push(
+          `/error/${error.response ? error.response.status : "404"}`
+        );
       });
   }
 

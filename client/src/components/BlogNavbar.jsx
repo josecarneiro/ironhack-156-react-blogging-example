@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Navbar from "react-bootstrap/Navbar";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
+import { withRouter } from "react-router";
 
 const BlogNavbar = props => {
   return (
@@ -36,4 +37,4 @@ const BlogNavbar = props => {
   );
 };
 
-export default BlogNavbar;
+export default withRouter(BlogNavbar);

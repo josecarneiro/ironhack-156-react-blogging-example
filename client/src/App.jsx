@@ -32,7 +32,8 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: null
+      user: null,
+      loaded: false
     };
     this.signOut = this.signOut.bind(this);
     this.loadUser = this.loadUser.bind(this);
@@ -43,13 +44,15 @@ export default class App extends Component {
   componentDidMount() {
     verifyService()
       .then(user => {
-        if (user) {
-          this.setState({
-            user
-          });
-        }
+        this.setState({
+          ...(user && { user }),
+          loaded: true
+        });
       })
       .catch(error => {
+        this.setState({
+          loaded: true
+        });
         console.log(error);
       });
   }
@@ -87,36 +90,38 @@ export default class App extends Component {
         <Router>
           <Container>
             <BlogNavbar user={this.state.user} signOut={this.signOut} />
-            <Switch>
-              <Route path="/" exact component={ListView} />
-              <ProtectedRoute
-                path="/post/create"
-                component={CreateView}
-                verify={this.verifyAuthenticated}
-              />
-              <ProtectedRoute
-                path="/post/:id/edit"
-                component={EditView}
-                verify={this.verifyAuthenticated}
-              />
-              <Route path="/post/:id" exact component={PostView} />
-              <ProtectedRoute
-                path="/sign-up"
-                verify={this.verifyUnauthenticated}
-                render={props => (
-                  <SignUp {...props} exact loadUser={this.loadUser} />
-                )}
-              />
-              <ProtectedRoute
-                path="/sign-in"
-                verify={this.verifyUnauthenticated}
-                render={props => (
-                  <SignIn {...props} exact loadUser={this.loadUser} />
-                )}
-              />
-              <Route path="/error/:code" component={ErrorView} />
-              <Redirect path="/" to="/error/404" />
-            </Switch>
+            {this.state.loaded && (
+              <Switch>
+                <Route path="/" exact component={ListView} />
+                <ProtectedRoute
+                  path="/post/create"
+                  component={CreateView}
+                  verify={this.verifyAuthenticated}
+                />
+                <ProtectedRoute
+                  path="/post/:id/edit"
+                  component={EditView}
+                  verify={this.verifyAuthenticated}
+                />
+                <Route path="/post/:id" exact component={PostView} />
+                <ProtectedRoute
+                  path="/sign-up"
+                  verify={this.verifyUnauthenticated}
+                  render={props => (
+                    <SignUp {...props} exact loadUser={this.loadUser} />
+                  )}
+                />
+                <ProtectedRoute
+                  path="/sign-in"
+                  verify={this.verifyUnauthenticated}
+                  render={props => (
+                    <SignIn {...props} exact loadUser={this.loadUser} />
+                  )}
+                />
+                <Route path="/error/:code" component={ErrorView} />
+                <Redirect path="/" to="/error/404" />
+              </Switch>
+            )}
           </Container>
         </Router>
       </div>
